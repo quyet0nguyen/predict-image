@@ -1,0 +1,12 @@
+{
+  "name": "app_predict_image",
+  "displayName": "app_predict_image",
+  "expo": {
+    "name": "app_predict_image",
+    "slug": "app_predict_image",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
