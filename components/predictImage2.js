@@ -1,16 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, ScrollView,Image} from 'react-native';
+import { StyleSheet, Text, View, Button, ScrollView, Image, Dimensions } from 'react-native';
 import ImageBrowser from './ImageBrowser';
-import AsyncStorage from '@react-native-community/async-storage';
 import Tflite from 'tflite-react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
+const widthPhone = Dimensions.get("window").width;
+const STORAGE_KEY = '@history2'
 let tflite = new Tflite();
-
-const height = 350;
-const width = 350;
-const blue = "#25d5fd";
-const STORAGE_KEY = '@history'
-
+let saved_history = [];
 
 export default class PredictImage extends React.Component {
   constructor(props) {
@@ -18,18 +15,14 @@ export default class PredictImage extends React.Component {
     this.state = {
       imageBrowserOpen: false,
       photos: [],
-      source: null,
-      imageHeight: height,
-      imageWidth: width,
-      recognitions: [],
-      save_history: [],
+      save_to_history: [],
     }
   }
 
-  componentDidMount () {
- //   this.readData();
+  componentDidMount() {
+       this.readData();
 
-    var modelFile = '8class.tflite';
+    var modelFile = 'mobV2.tflite';
     var labelsFile = '8class.txt';
     tflite.loadModel({
       model: modelFile,
@@ -42,35 +35,37 @@ export default class PredictImage extends React.Component {
         else
           console.log(res);
       });
-    this.predict = this.predict.bind(this);
   }
 
   async readData() {
     try {
       const history = await AsyncStorage.getItem(STORAGE_KEY)
       if (history !== null) {
-        let saved_history = JSON.parse(history)
-        this.setState({save_history: saved_history})
+        saved_history = JSON.parse(history) 
+        this.setState({recognitions:[]});
       }
     } catch (e) {
       console.log(e)
     }
   }
 
-  async saveData(data) {
+  async saveData() {
     try {
+      saved_history = saved_history.concat(this.state.save_to_history);
+      let data = JSON.stringify(saved_history);
       await AsyncStorage.setItem(STORAGE_KEY, data)
-      console.log('a')
       console.log('Data successfully saved')
-      console.log(data);
     } catch (e) {
-      console.log('Failed to save the data to the storage')
+      console.log(e)
     }
   }
 
   imageBrowserCallback = (callback) => {
+    this.setState({stop: 1})
     callback.then((photos) => {
-      console.log(photos)
+      photos.map((item, i)=> {
+        this.predict(item, i);
+      })
       this.setState({
         imageBrowserOpen: false,
         photos
@@ -78,48 +73,63 @@ export default class PredictImage extends React.Component {
     }).catch((e) => console.log(e))
   }
 
-  predict(item) {
-      tflite.runModelOnImage({                                                                     
-      path: item.uri,
-      imageMean: 128.0,
-      imageStd: 128.0,
-      numResults: 8,
-      threshold: 0.05
-    },
-      (err, res) => {
-        if (err)
-          console.log(err);
-        else
-          this.setState({recognitions: res});
-          console.log(res);
-      });
+  predict(item, i) {
+      let dem = 0;
+      tflite.runModelOnImage({
+        path: item.uri,
+        imageMean: 128,
+        imageStd: 128,
+        numResults: 8,
+        threshold: 0.05
+      },
+        (err, res) => {
+          if (err)
+            console.log(err);
+          else {
+            if (dem < 4) {
+              let newState = Object.assign({}, this.state);
+              newState.save_to_history[i] = item;
+              newState.save_to_history[i].recognitions = res;
+              this.setState(newState);
+              return ;
+            }
+            if (dem <5) dem = dem + 1;
+          }
+        });
   }
 
-   renderImage(item, i) {
-    this.predict(item);
-    console.log(this.state.recognitions);
-    return(
-    <View>
-      <Image
-        style={{height: 300, width: 300}}
-        source={{uri: item.file}}
-        key={i}
-      />
-    </View>
-    )
+  renderImage(item, i) {
+    const { save_to_history } = this.state;
+    if (save_to_history[i] != null) {
+      if (i==this.state.photos.length-1) this.saveData();
+     
+      return (
+      <View key={i}>
+        <Image
+          style={{ height: widthPhone, width: widthPhone }}
+          source={{ uri: save_to_history[i].uri }}
+          key={i}
+        />
+        {save_to_history[i].recognitions.length > 0 && <Text>{JSON.stringify(save_to_history[i].recognitions)}</Text>}
+      </View>
+      )
+
+      
+    }
   }
+
   render() {
     if (this.state.imageBrowserOpen) {
-      return(<ImageBrowser callback={this.imageBrowserCallback}/>);
+      return (<ImageBrowser callback={this.imageBrowserCallback} />);
     }
     return (
       <View style={styles.container}>
         <Button
           title="Choose Images"
-          onPress={() => this.setState({imageBrowserOpen: true})}
+          onPress={() => this.setState({ imageBrowserOpen: true })}
         />
         <ScrollView>
-          {this.state.photos.map((item,i) => this.renderImage(item,i))}
+          {this.state.photos.map((item, i) => this.renderImage(item, i))}
         </ScrollView>
       </View>
     );

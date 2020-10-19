@@ -9,19 +9,18 @@ const STORAGE_KEY = '@history2'
 let tflite = new Tflite();
 let saved_history = [];
 
-export default class App extends React.Component {
+export default class PredictImage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       imageBrowserOpen: false,
       photos: [],
       save_to_history: [],
-      stop: 0,
     }
   }
 
   componentDidMount() {
-    //   this.readData();
+       this.readData();
 
     var modelFile = 'mobV2.tflite';
     var labelsFile = '8class.txt';
@@ -42,7 +41,8 @@ export default class App extends React.Component {
     try {
       const history = await AsyncStorage.getItem(STORAGE_KEY)
       if (history !== null) {
-        saved_history = JSON.parse(history)
+        saved_history = JSON.parse(history) 
+        this.setState({recognitions:[]});
       }
     } catch (e) {
       console.log(e)
@@ -50,15 +50,11 @@ export default class App extends React.Component {
   }
 
   async saveData() {
-    if (this.state.stop == 1) 
     try {
-      data = saved_history.concat(this.state.save_to_history);
-      data = JSON.stringify(data);
+      saved_history = saved_history.concat(this.state.save_to_history);
+      let data = JSON.stringify(saved_history);
       await AsyncStorage.setItem(STORAGE_KEY, data)
-      this.setState({save_to_history : []});
       console.log('Data successfully saved')
-      console.log(data);
-      this.setState({stop: 0});
     } catch (e) {
       console.log(e)
     }
@@ -67,6 +63,13 @@ export default class App extends React.Component {
   imageBrowserCallback = (callback) => {
     this.setState({stop: 1})
     callback.then((photos) => {
+      let date1 = new Date();
+      let date2 = null;
+      photos.map((item, i)=> {
+        this.predict(item, i);
+        if (i == photos.length-1) date2 = new Date();
+      }) 
+      if (date2 != null )console.log(date2 - date1);
       this.setState({
         imageBrowserOpen: false,
         photos
@@ -92,7 +95,7 @@ export default class App extends React.Component {
               newState.save_to_history[i] = item;
               newState.save_to_history[i].recognitions = res;
               this.setState(newState);
-              return;
+              return ;
             }
             if (dem <5) dem = dem + 1;
           }
@@ -100,13 +103,10 @@ export default class App extends React.Component {
   }
 
   renderImage(item, i) {
-    let dem = 0;
-    this.predict(item, i);
     const { save_to_history } = this.state;
-    if (save_to_history[i] != null && dem < 1) {
-      dem = dem + 1;
+    if (save_to_history[i] != null) {
       if (i==this.state.photos.length-1) this.saveData();
-      
+     
       return (
       <View key={i}>
         <Image

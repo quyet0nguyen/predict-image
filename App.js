@@ -12,6 +12,7 @@ const Tab = createBottomTabNavigator();
 
 class App extends Component {
 
+
   render() {
     return (
       <NavigationContainer>
@@ -35,8 +36,8 @@ class App extends Component {
             inactiveTintColor: 'gray',
           }}
         >
-          <Tab.Screen name="Predict Image" component={PredictImage} />
-          <Tab.Screen name="Pedict Camera" component={PredictCamera} />
+          <Tab.Screen name="Predict Image" component={PredictImage}  />
+          <Tab.Screen name="Predict Camera" component={PredictCamera}  />
           <Tab.Screen name="History" component={History} />
         </Tab.Navigator>
       </NavigationContainer>
