@@ -133,6 +133,7 @@ export default class ImageBrowser extends React.Component {
       </View>
     )
   }
+  
   renderImageTile = ({ item, index }) => {
     let selected = this.state.selected[index] ? true : false
     return (
@@ -155,7 +156,7 @@ export default class ImageBrowser extends React.Component {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={<Text>Loading...</Text>}
         initialNumToRender={24}
-        getItemLayout={this.getItemLayout}
+        eached={this.getItemLayout}
       />
     )
   }

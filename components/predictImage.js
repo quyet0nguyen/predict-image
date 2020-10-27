@@ -23,7 +23,7 @@ export default class PredictImage extends React.Component {
        this.readData();
 
     var modelFile = 'mobV2.tflite';
-    var labelsFile = '8class.txt';
+    var labelsFile = 'mobV2.txt';
     tflite.loadModel({
       model: modelFile,
       labels: labelsFile,
@@ -63,13 +63,9 @@ export default class PredictImage extends React.Component {
   imageBrowserCallback = (callback) => {
     this.setState({stop: 1})
     callback.then((photos) => {
-      let date1 = new Date();
-      let date2 = null;
       photos.map((item, i)=> {
         this.predict(item, i);
-        if (i == photos.length-1) date2 = new Date();
       }) 
-      if (date2 != null )console.log(date2 - date1);
       this.setState({
         imageBrowserOpen: false,
         photos
@@ -78,19 +74,22 @@ export default class PredictImage extends React.Component {
   }
 
   predict(item, i) {
+      let size_item = item.size;
+      item.size = 400;
       let dem = 0;
       tflite.runModelOnImage({
         path: item.uri,
         imageMean: 128,
         imageStd: 128,
-        numResults: 8,
+        numResults: 33,
         threshold: 0.05
       },
         (err, res) => {
           if (err)
             console.log(err);
           else {
-            if (dem < 4) {
+            if (dem < 1) {
+              item.size = size_item;
               let newState = Object.assign({}, this.state);
               newState.save_to_history[i] = item;
               newState.save_to_history[i].recognitions = res;
@@ -114,7 +113,13 @@ export default class PredictImage extends React.Component {
           source={{ uri: save_to_history[i].uri }}
           key={i}
         />
-        {save_to_history[i].recognitions.length > 0 && <Text>{JSON.stringify(save_to_history[i].recognitions)}</Text>}
+        {save_to_history[i].recognitions.map((res) => {
+                    return (
+                      <Text style={{ color: 'black', fontSize:18, padding: 10}}>
+                        {res["label"] + " : " + (res["confidence"] * 100).toFixed(0) + "%"}
+                      </Text>
+                    )
+        })}
       </View>
       )
 
@@ -132,7 +137,7 @@ export default class PredictImage extends React.Component {
           title="Choose Images"
           onPress={() => this.setState({ imageBrowserOpen: true })}
         />
-        <ScrollView>
+        <ScrollView>   
           {this.state.photos.map((item, i) => this.renderImage(item, i))}
         </ScrollView>
       </View>

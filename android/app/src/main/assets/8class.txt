@@ -1,8 +1,0 @@
-dogs
-cats
-horses
-chickens
-cows
-spiders
-lambs
-elephants

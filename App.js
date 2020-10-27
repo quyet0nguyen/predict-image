@@ -22,11 +22,11 @@ class App extends Component {
               let ionicon;
 
               if (route.name === 'Predict Image') {
-                ionicon = focused ? 'md-calendar' : 'ios-calendar';
+                ionicon = focused ? 'ios-folder' : 'ios-folder';
               } else if (route.name === 'Predict Camera') {
-                ionicon = focused ? 'md-calendar' : 'ios-calendar';
+                ionicon = focused ? 'ios-camera' : 'ios-camera';
               } else if (route.name === 'History') {
-                ionicon = focused? 'md-calendar' : 'ios-calendar';
+                ionicon = focused? 'ios-speedometer' : 'ios-speedometer';
               }
               return <Ionicons name={ionicon} size={size} color={color} />;
             },

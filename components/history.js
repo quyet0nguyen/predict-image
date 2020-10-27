@@ -3,7 +3,6 @@ import { Platform, StyleSheet, Image, Text, View, TouchableOpacity, RefreshContr
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 const STORAGE_KEY = '@history2'
-const heightPhone = Dimensions.get("window").height;
 const widthPhone = Dimensions.get("window").width;
 
 
