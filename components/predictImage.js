@@ -20,10 +20,10 @@ export default class PredictImage extends React.Component {
   }
 
   componentDidMount() {
-       this.readData();
+    this.readData();
 
     var modelFile = 'mobV2.tflite';
-    var labelsFile = 'mobV2.txt';
+    var labelsFile = 'labels.txt';
     tflite.loadModel({
       model: modelFile,
       labels: labelsFile,
@@ -75,13 +75,13 @@ export default class PredictImage extends React.Component {
 
   predict(item, i) {
       let size_item = item.size;
-      item.size = 400;
+      item.size = 224;
       let dem = 0;
       tflite.runModelOnImage({
         path: item.uri,
         imageMean: 128,
         imageStd: 128,
-        numResults: 33,
+        numResults: 32,
         threshold: 0.05
       },
         (err, res) => {

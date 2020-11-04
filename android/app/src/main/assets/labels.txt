@@ -19,8 +19,7 @@ dc_emerson_mo
 dc_huawei_dong
 dc_huawei_mo
 dc_zte_2
-dc_zte_dong
-dc_zte_mo
+dc_zte
 dinh_cot_tron
 dinh_cot_vuong
 mat_sau_nha_may_no

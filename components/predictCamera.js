@@ -40,7 +40,7 @@ export default function PredictCamera() {
     })();
 
       var modelFile = 'mobV2.tflite';
-      var labelsFile = 'mobV2.txt';
+      var labelsFile = 'labels.txt';
       
       tflite.loadModel({
         model: modelFile,
@@ -76,7 +76,7 @@ export default function PredictCamera() {
           path: img_path,
           imageMean: 128.0,
           imageStd: 128.0,
-          numResults: 33,
+          numResults: 32,
           threshold: 0.05
         },
           (err, res) => {
@@ -192,6 +192,7 @@ export default function PredictCamera() {
         type={cameraType}
         flashMode={Camera.Constants.FlashMode.off}
         onCameraReady={onCameraReady}
+        ratio="16:9"
         onMountError={(error) => {
           console.log("cammera error", error);
         }}
